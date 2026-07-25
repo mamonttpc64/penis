@@ -6,6 +6,49 @@
   <Description />
   <Author>Jeb Kerman</Author>
   <WorkshopFileHandle>0</WorkshopFileHandle>
-  <Instructions>
+  <Instructions># d0 = Gas Sensor in the controlled room
+# All oxygen supply active vents must be named exactly: Oxy Vent
+# Vents turn on below 20 kPa O2 partial pressure and off above 22 kPa.
+
+define OxyVent HASH("StructureActiveVent")
+define OxyVentName HASH("Oxy Vent")
+define O2On 20
+define O2Off 22
+
+alias GasSensor d0
+alias Pressure r0
+alias O2Ratio r1
+alias O2Pressure r2
+alias VentsOn r3
+alias NeedO2 r4
+alias EnoughO2 r5
+
+move VentsOn 0
+sbn OxyVent OxyVentName Mode 0
+sbn OxyVent OxyVentName On VentsOn
+
+Main:
+  l Pressure GasSensor Pressure
+  l O2Ratio GasSensor RatioOxygen
+  mul O2Pressure Pressure O2Ratio
+
+  slt NeedO2 O2Pressure O2On
+  sgt EnoughO2 O2Pressure O2Off
+  bnez NeedO2 TurnOn
+  bnez EnoughO2 TurnOff
+  j Apply
+
+TurnOn:
+  move VentsOn 1
+  j Apply
+
+TurnOff:
+  move VentsOn 0
+
+Apply:
+  sbn OxyVent OxyVentName Mode 0
+  sbn OxyVent OxyVentName On VentsOn
+  yield
+  j Main
 </Instructions>
 </InstructionData>
