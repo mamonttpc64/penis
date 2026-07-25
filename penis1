@@ -6,53 +6,6 @@
   <Description />
   <Author>Jeb Kerman</Author>
   <WorkshopFileHandle>0</WorkshopFileHandle>
-  <Instructions>alias sensor d0
-alias gas_level r0
-alias pressure_level r1
-
-
-define LOW_OXY 30     
-define HIGH_OXY 50    
-
-
-define LOW_PRESS 90   
-define HIGH_PRESS 105 
-
-main:
-  
-  l gas_level sensor RatioOxygen
-  mul gas_level gas_level 100
-
-
-  l pressure_level sensor Pressure
-
-
- 
-  blt gas_level LOW_OXY check_pressure_low
-  
- 
-  
-  bgt gas_level HIGH_OXY turn_off
-  bgt pressure_level HIGH_PRESS turn_off
-
-  
-  yield
-  j main
-
-check_pressure_low:
-
-  blt pressure_level LOW_PRESS turn_on
- 
-  j turn_off
-
-turn_on:
-  sbn HASH("StructureActiveVent") HASH("Oxygen") On 1
-  yield
-  j main
-
-turn_off:
-  sbn HASH("StructureActiveVent") HASH("Oxygen") On 0
-  yield
-  j main
+  <Instructions>
 </Instructions>
 </InstructionData>
