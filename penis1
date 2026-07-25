@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>134291013305936560</DateTime>
+  <GameVersion>0.2.6403.27689</GameVersion>
+  <Title>oxy level support</Title>
+  <Description />
+  <Author>Jeb Kerman</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>alias sensor d0
+alias gas_level r0
+alias pressure_level r1
+
+# Настройки для КИСЛОРОДА (в процентах)
+define LOW_OXY 30     # Включить, если кислорода меньше 30%
+define HIGH_OXY 50    # Выключить, когда станет больше 50%
+
+# Настройки для ДАВЛЕНИЯ (в килопаскалях, кПа)
+define LOW_PRESS 90   # Минимальное целевое давление в комнате
+define HIGH_PRESS 105 # Максимальное безопасное давление
+
+main:
+  # 1. Проверяем кислород
+  l gas_level sensor RatioOxygen
+  mul gas_level gas_level 100
+
+  # 2. Проверяем давление
+  l pressure_level sensor Pressure
+
+  # Логика включения:
+  # Если КИСЛОРОДА меньше LOW_OXY, проверяем давление для безопасного старта
+  blt gas_level LOW_OXY check_pressure_low
+  
+  # Логика выключения:
+  # Если КИСЛОРОДА уже достаточно (больше HIGH_OXY) ИЛИ давление превысило максимум -&gt; выключаем
+  bgt gas_level HIGH_OXY turn_off
+  bgt pressure_level HIGH_PRESS turn_off
+
+  # Если мы внутри рабочих порогов, ничего не меняем
+  yield
+  j main
+
+check_pressure_low:
+  # Включаем только если давление при этом НИЖЕ минимальной нормы
+  blt pressure_level LOW_PRESS turn_on
+  # Если давление уже нормальное/высокое, а кислорода мало — не качаем (безопасность)
+  j turn_off
+
+turn_on:
+  sbn HASH("StructureActiveVent") HASH("Oxygen") On 1
+  yield
+  j main
+
+turn_off:
+  sbn HASH("StructureActiveVent") HASH("Oxygen") On 0
+  yield
+  j main
+</Instructions>
+</InstructionData>
